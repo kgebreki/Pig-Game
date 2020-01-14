@@ -1,5 +1,5 @@
 /*
-GAME RULES:
+PIG GAME RULES:
 
 - The game has 2 players, playing in rounds
 - In each turn, a player rolls a dice as many times as he whishes. Each result get added to his ROUND score
@@ -16,15 +16,24 @@ Init();
 document.querySelector('.btn-roll').addEventListener('click', function () {
     if (isGamePlaying) {
         // Random number between 1-6
-        let dice = Math.floor(Math.random()*6) + 1;
-        let diceDOM = document.querySelector('.dice');
+        let dice1 = Math.floor(Math.random()*6) + 1;
+        let dice2 = Math.floor(Math.random()*6) + 1;
         // Display dice image according to value
-        diceDOM.style.display = 'block';
-        diceDOM.src = `dice-${dice}.png`;
-        if (dice === 1) { // Next player
+        let dice1DOM = document.getElementById('dice-1');
+        let dice2DOM = document.getElementById('dice-2');
+        dice1DOM.style.display = 'block';
+        dice2DOM.style.display = 'block';
+        dice1DOM.src = `dice-${dice1}.png`;
+        dice2DOM.src = `dice-${dice2}.png`;
+        // If player rolls two 1s (snake eyes), they lose their turn and lose all the points accumulated during the game
+        if (dice1 === 1 && dice2 === 1) {
+            scores[activePlayer] = 0;
+            document.getElementById(`score-${activePlayer}`).textContent = scores[activePlayer];
             NextPlayer();
-        } else { // Update score
-            roundScore += dice;
+        } else if (dice1 === 1 || dice2 === 1) { // player losers their turn and all the points accumulated during their turn
+            NextPlayer();
+        } else { // update score
+            roundScore += dice1 + dice2;
             document.getElementById(`current-${activePlayer}`).textContent = roundScore;
         }
     }
@@ -37,10 +46,15 @@ document.querySelector('.btn-hold').addEventListener('click', function () {
         scores[activePlayer] += roundScore;
         // Update UI
         document.getElementById(`score-${activePlayer}`).textContent = scores[activePlayer];
+        // Assign win score to game logic
+        const input = document.querySelector('.win-score').value;
+        let winScore;
+        winScore = input ? input: 100;
         // Check win condition
-        if (scores[activePlayer] >= 20) {
+        if (scores[activePlayer] >= winScore) {
             document.getElementById(`name-${activePlayer}`).textContent = 'Winner!';
-            document.querySelector('.dice').style.display = 'none';
+            document.getElementById('dice-1').style.display = 'none';
+            document.getElementById('dice-2').style.display = 'none';
             document.querySelector(`.player-${activePlayer}-panel`).classList.add('winner');
             document.querySelector(`.player-${activePlayer}-panel`).classList.remove('active');
             isGamePlaying = false;
@@ -59,7 +73,8 @@ function Init() {
     roundScore = 0;
     activePlayer = 0;
     isGamePlaying = true;
-    document.querySelector('.dice').style.display = 'none';
+    document.getElementById('dice-1').style.display = 'none';
+    document.getElementById('dice-2').style.display = 'none';
     document.getElementById('current-0').textContent = '0';
     document.getElementById('current-1').textContent = '0';
     document.getElementById('score-0').textContent = '0';
@@ -76,7 +91,8 @@ function Init() {
 function NextPlayer() {
     activePlayer = activePlayer === 0 ? 1 : 0;
     roundScore = 0;
-    document.querySelector('.dice').style.display = 'none';
+    document.getElementById('dice-1').style.display = 'none';
+    document.getElementById('dice-2').style.display = 'none';
     document.getElementById(`current-0`).textContent = '0';
     document.getElementById(`current-1`).textContent = '0';
     document.querySelector(`.player-0-panel`).classList.toggle('active');
